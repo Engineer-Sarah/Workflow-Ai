@@ -166,7 +166,7 @@ def ask_ai(prompt, system_hint=""):
 
 # ─── Auto-load API key ────────────────────────────────────────────────────────
 if not st.session_state.get("model"):
-    env_key = os.environ.get("GEMINI_API_KEY", "AIzaSyDB_VkdcQKIvNO9W7hfxkCVzrsek2ZmizU")
+    env_key = os.environ.get("GEMINI_API_KEY", "")
     model, model_name = try_init_model(env_key)
     if model:
         st.session_state.model = model
