@@ -51,8 +51,7 @@ hr { border-color: #1e293b !important; }
 for k, v in {"tasks": [], "emails": [], "meetings": [], "reports": [], "api_key_valid": False, "model": None, "last_api_key": ""}.items():
     if k not in st.session_state:
         st.session_state[k] = v
-if st.session_state.api_key_valid:
-    st.success("🚀 Demo Ready: AI is fully connected. No setup required.")
+
 # AI Functions
 def try_init_model(api_key):
     genai.configure(api_key=api_key)
@@ -99,7 +98,8 @@ if not st.session_state.get("model"):
             st.session_state.model = m
             st.session_state.api_key_valid = True
             st.session_state.last_api_key = auto_key
-
+if st.session_state.api_key_valid:
+    st.success("🚀 Demo Ready: AI is fully connected. No setup required.")
 # Sidebar
 with st.sidebar:
     st.markdown("""
