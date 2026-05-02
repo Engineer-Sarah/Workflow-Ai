@@ -166,7 +166,7 @@ def ask_ai(prompt, system_hint=""):
 
 # ─── Auto-load API key ────────────────────────────────────────────────────────
 if not st.session_state.get("model"):
-    env_key = os.environ.get("GEMINI_API_KEY", "")
+   env_key = st.secrets.get("GEMINI_API_KEY", "") if hasattr(st, "secrets") else os.environ.get("GEMINI_API_KEY", "")
     if env_key and len(env_key) > 10:
         model, model_name = try_init_model(env_key)
         if model:
