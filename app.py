@@ -77,39 +77,26 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     st.markdown("---")
 
-    # 1. AUTO-CONNECT LOGIC (Checks secrets automatically)
+    # AUTO-CONNECT ONLY (No manual input box for judges)
     if not st.session_state.api_key_valid:
+        # Check secrets
         secret_key = get_api_key()
         if secret_key:
             model, name = try_init_model(secret_key)
             if model:
                 st.session_state.model = model
                 st.session_state.api_key_valid = True
-                st.session_state.last_api_key = secret_key
                 st.rerun()
+        else:
+            st.warning("⚙️ System: Waiting for API Secret...")
 
-    # 2. API KEY UI
     if st.session_state.api_key_valid:
         st.markdown("""
         <div style='background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3);
         border-radius:10px; padding:0.6rem 1rem; color:#34d399; font-size:0.82rem; font-weight:600;'>
-            ✅ AI Connected & Ready
+            ✅ AI System Active
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Change Key", use_container_width=True):
-            st.session_state.api_key_valid = False
-            st.rerun()
-    else:
-        st.markdown("<div style='font-size:0.75rem; color:#64748b; font-weight:600; text-transform:uppercase;'>Gemini API Key</div>", unsafe_allow_html=True)
-        key_input = st.text_input("", type="password", placeholder="Paste key here...", label_visibility="collapsed", key="manual_key_input")
-        if key_input:
-            model, name = try_init_model(key_input)
-            if model:
-                st.session_state.model = model
-                st.session_state.api_key_valid = True
-                st.rerun()
-            else:
-                st.error("Invalid API Key")
 
     st.markdown("---")
     st.markdown("<div style='font-size:0.75rem; color:#64748b; font-weight:600; text-transform:uppercase; margin-bottom:0.5rem;'>Navigation</div>", unsafe_allow_html=True)
@@ -122,13 +109,12 @@ with st.sidebar:
         "💬  Customer Reply": "Customer Reply",
         "📈  Weekly Report": "Weekly Report",
     }
-    # FIXED: Added unique key to prevent DuplicateElementId error
+    
     page_choice = st.radio("", list(pages.keys()), label_visibility="collapsed", key="main_nav")
     current_page = pages[page_choice]
     
     st.markdown("---")
     st.markdown("<div style='font-size:0.7rem; color:#475569; text-align:center;'>Powered by Google Gemini AI</div>", unsafe_allow_html=True)
-
 # --- PAGE CONTENT ROUTING ---
 if current_page == "Dashboard":
     st.markdown("<div style='font-size:1.7rem; font-weight:800; color:#f1f5f9;'>Main Dashboard</div>", unsafe_allow_html=True)
