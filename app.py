@@ -110,25 +110,45 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     st.markdown("---")
 
+    # 1. Check if we have a key in secrets but haven't initialized the model yet
     if not st.session_state.api_key_valid:
-        st.markdown("<div style='font-size:0.75rem; color:#64748b; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:0.3rem;'>Gemini API Key</div>", unsafe_allow_html=True)
-        api_key = st.text_input("", type="password", placeholder="AIza...", label_visibility="collapsed", key="api_key_input")
-        if api_key and api_key != st.session_state.get("last_api_key", ""):
-            with st.spinner("Connecting..."):
-                model, model_name = try_init_model(api_key)
-            if model:
-                st.session_state.model = model
-                st.session_state.api_key_valid = True
-                st.session_state.last_api_key = api_key
-                st.success(f"✅ Connected · {model_name}")
-           
-    else:
+        auto_key = get_api_key()
+        if auto_key:
+            with st.spinner("Auto-connecting..."):
+                m, mn = try_init_model(auto_key)
+                if m:
+                    st.session_state.model = m
+                    st.session_state.api_key_valid = True
+                    st.session_state.last_api_key = auto_key
+
+    # 2. Display either the Success Message OR the Input Box
+    if st.session_state.api_key_valid:
         st.markdown("""
         <div style='background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3);
         border-radius:10px; padding:0.6rem 1rem; color:#34d399; font-size:0.82rem; font-weight:600;'>
             ✅ AI Connected & Ready
         </div>
         """, unsafe_allow_html=True)
+        
+        # Optional: Add a reset button if you want to change keys
+        if st.button("Change API Key", use_container_width=True):
+            st.session_state.api_key_valid = False
+            st.session_state.model = None
+            st.rerun()
+    else:
+        st.markdown("<div style='font-size:0.75rem; color:#64748b; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:0.3rem;'>Gemini API Key</div>", unsafe_allow_html=True)
+        api_key_input = st.text_input("", type="password", placeholder="AIza...", label_visibility="collapsed", key="api_key_widget")
+        
+        if api_key_input:
+            with st.spinner("Connecting..."):
+                model, model_name = try_init_model(api_key_input)
+                if model:
+                    st.session_state.model = model
+                    st.session_state.api_key_valid = True
+                    st.session_state.last_api_key = api_key_input
+                    st.rerun()
+                else:
+                    st.error("❌ Invalid Key")
 
     st.markdown("---")
     st.markdown("<div style='font-size:0.75rem; color:#64748b; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:0.5rem;'>Navigation</div>", unsafe_allow_html=True)
