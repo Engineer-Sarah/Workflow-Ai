@@ -1,108 +1,149 @@
 import streamlit as st
-from groq import Groq  # Updated for Groq
+from groq import Groq
 import pandas as pd
 import plotly.express as px
 from datetime import datetime
-import os
 
-# 1. PAGE SETUP
-st.set_page_config(page_title="WorkFlow AI (Groq)", page_icon="⚡", layout="wide")
+# 1. LUXURY PAGE CONFIG
+st.set_page_config(page_title="WorkFlow AI Pro", page_icon="💎", layout="wide")
 
-# 2. UI/UX STYLING (Same as before)
+# 2. PREMIUM CSS (Glassmorphism & Midnight Aesthetics)
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-html, body, [class*="css"] { font-family: 'Inter', sans-serif; background-color: #0b1120; color: #e2e8f0; }
-.metric-card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 1.5rem; text-align: center; }
-.metric-number { font-size: 2rem; font-weight: 700; color: #6366f1; }
-.ai-output { background: #0f172a; border-left: 4px solid #6366f1; border-radius: 8px; padding: 1.5rem; white-space: pre-wrap; margin-top: 10px; }
-.stButton > button { background: linear-gradient(90deg, #6366f1, #8b5cf6) !important; color: white !important; border-radius: 8px !important; width: 100%; height: 3rem; font-weight: bold; }
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+/* Global Reset */
+html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050810; color: #f8fafc; }
+.stApp { background: radial-gradient(circle at top right, #0f172a, #050810); }
+
+/* Custom Sidebar */
+[data-testid="stSidebar"] { background-color: rgba(15, 23, 42, 0.8) !important; border-right: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+
+/* Premium Cards */
+.glass-card {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    margin-bottom: 1rem;
+}
+
+.metric-val { font-size: 2.5rem; font-weight: 800; background: linear-gradient(90deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.metric-lbl { color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; font-size: 0.7rem; }
+
+/* AI Output Styling */
+.ai-box {
+    background: linear-gradient(145deg, #0f172a, #1e293b);
+    border: 1px solid #334155;
+    border-left: 5px solid #6366f1;
+    border-radius: 12px;
+    padding: 1.5rem;
+    color: #cbd5e1;
+    line-height: 1.8;
+}
+
+/* Luxury Button */
+.stButton > button {
+    background: linear-gradient(90deg, #6366f1, #a855f7) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    padding: 0.75rem 2rem !important;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4) !important;
+    transition: all 0.3s ease !important;
+}
+.stButton > button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6) !important; }
+
+/* Navigation Radio Styling */
+div[data-testid="stSidebarNav"] { padding-top: 2rem; }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. SESSION STATE
-if "tasks" not in st.session_state: st.session_state.tasks = []
+# 3. CORE LOGIC
+def get_client():
+    key = st.secrets.get("GROQ_API_KEY")
+    return Groq(api_key=key) if key else None
 
-# 4. GROQ AI ENGINE
-def get_groq_client():
-    # Looks for 'GROQ_API_KEY' in Streamlit Secrets
-    api_key = st.secrets.get("GROQ_API_KEY")
-    if not api_key:
-        return None
-    return Groq(api_key=api_key)
+client = get_client()
 
-client = get_groq_client()
-
-def ask_groq(prompt, system_msg="You are an elite productivity assistant."):
-    if not client:
-        return "❌ Missing GROQ_API_KEY in Streamlit Secrets."
+def ask_ai(prompt, system="You are WorkFlow Pro, an elite executive assistant."):
+    if not client: return "⚠️ Error: API Key not detected."
     try:
-        # Using Llama-3-70b via Groq for high-quality responses
-        completion = client.chat.completions.create(
+        chat = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
-            messages=[
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            max_tokens=1024
+            messages=[{"role":"system","content":system}, {"role":"user","content":prompt}]
         )
-        return completion.choices[0].message.content
-    except Exception as e:
-        return f"Error: {str(e)}"
+        return chat.choices[0].message.content
+    except Exception as e: return f"System Error: {str(e)}"
 
-# 5. SIDEBAR NAVIGATION
+# 4. SIDEBAR
 with st.sidebar:
-    st.title("🚀 WorkFlow AI")
-    if client: st.success("⚡ Groq Engine Active")
-    else: st.error("⚠️ Add GROQ_API_KEY to Secrets")
+    st.markdown("<h1 style='text-align:center; color:white;'>💎 WorkFlow Pro</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#64748b; font-size:0.8rem;'>PREMIUM PRODUCTIVITY SUITE</p>", unsafe_allow_html=True)
+    st.markdown("---")
     
-    page = st.radio("MENU", ["📊 Dashboard", "✉️ AI Email", "🎙️ Summarizer", "✅ Task Manager"])
+    if client:
+        st.markdown("<div style='background:rgba(16,185,129,0.1); color:#10b981; padding:10px; border-radius:10px; text-align:center; border:1px solid #10b981;'>● AI ENGINE ONLINE</div>", unsafe_allow_html=True)
+    else:
+        st.markdown("<div style='background:rgba(244,63,94,0.1); color:#f43f5e; padding:10px; border-radius:10px; text-align:center; border:1px solid #f43f5e;'>○ ENGINE DISCONNECTED</div>", unsafe_allow_html=True)
 
-# 6. DASHBOARD
-if page == "📊 Dashboard":
-    st.markdown("## Global Overview")
+    page = st.radio("NAVIGATION", ["Dashboard", "AI Email Studio", "Meeting Intelligence", "Task Master"])
+
+# 5. DASHBOARD
+if page == "Dashboard":
+    st.markdown("## 📊 Strategic Overview")
     c1, c2, c3 = st.columns(3)
-    c1.markdown("<div class='metric-card'><div class='metric-number'>500+</div><div>Tokens/Sec</div></div>", unsafe_allow_html=True)
-    c2.markdown("<div class='metric-card'><div class='metric-number'>12</div><div>Tasks Pending</div></div>", unsafe_allow_html=True)
-    c3.markdown("<div class='metric-card'><div class='metric-number'>99%</div><div>AI Accuracy</div></div>", unsafe_allow_html=True)
-    
-    df = pd.DataFrame({"Day": ["Mon", "Tue", "Wed", "Thu", "Fri"], "Workload": [5, 8, 4, 10, 7]})
-    fig = px.area(df, x="Day", y="Workload", title="Efficiency Trend")
+    with c1: st.markdown("<div class='glass-card'><div class='metric-lbl'>Efficiency Score</div><div class='metric-val'>98.2%</div></div>", unsafe_allow_html=True)
+    with c2: st.markdown("<div class='glass-card'><div class='metric-lbl'>Hours Reclaimed</div><div class='metric-val'>14.5</div></div>", unsafe_allow_html=True)
+    with c3: st.markdown("<div class='glass-card'><div class='metric-lbl'>AI Latency</div><div class='metric-val'>0.2s</div></div>", unsafe_allow_html=True)
+
+    df = pd.DataFrame({"Metric": ["Emails", "Tasks", "Meetings", "Reports"], "Count": [45, 32, 12, 8]})
+    fig = px.bar(df, x="Metric", y="Count", color="Count", color_continuous_scale="Blues", template="plotly_dark")
+    fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
     st.plotly_chart(fig, use_container_width=True)
 
-# 7. AI EMAIL WRITER
-elif page == "✉️ AI Email":
-    st.markdown("## ✉️ Smart Email Writer")
-    to = st.text_input("To (Client/Manager)")
-    topic = st.text_input("Purpose")
-    notes = st.text_area("Bullet points to include")
-    
-    if st.button("Generate Email"):
-        with st.spinner("Groq is thinking..."):
-            res = ask_groq(f"Draft a professional email to {to} about {topic}. Details: {notes}")
-            st.markdown(f"<div class='ai-output'>{res}</div>", unsafe_allow_html=True)
+# 6. EMAIL STUDIO
+elif page == "AI Email Studio":
+    st.markdown("## ✉️ AI Email Studio")
+    with st.container():
+        st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
+        with col1:
+            dest = st.text_input("Recipient Profile", placeholder="e.g. Senior VP of Engineering")
+        with col2:
+            tone = st.selectbox("Intelligence Tone", ["Executive Formal", "Persuasive", "Diplomatic", "Direct"])
+        
+        goal = st.text_area("Strategic Objective", placeholder="What must this email achieve?")
+        
+        if st.button("Generate Executive Draft"):
+            with st.spinner("Analyzing intent..."):
+                res = ask_ai(f"Draft a {tone} email to {dest}. Objective: {goal}")
+                st.markdown(f"<div class='ai-box'>{res}</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
-# 8. MEETING SUMMARIZER
-elif page == "🎙️ Summarizer":
-    st.markdown("## 🎙️ Meeting Summarizer")
-    transcript = st.text_area("Paste meeting transcript here...", height=300)
-    
-    if st.button("Summarize Now"):
-        with st.spinner("Extracting action items..."):
-            res = ask_groq(f"Summarize this into: 1. Decisions, 2. Action Items, 3. Next Steps. Transcript: {transcript}")
-            st.markdown(f"<div class='ai-output'>{res}</div>", unsafe_allow_html=True)
+# 7. MEETING INTELLIGENCE
+elif page == "Meeting Intelligence":
+    st.markdown("## 🎙️ Meeting Intelligence")
+    raw_text = st.text_area("Input Transcript", height=250, placeholder="Paste your raw meeting notes or transcript here...")
+    if st.button("Synthesize Action Plan"):
+        with st.spinner("Processing dialogue..."):
+            res = ask_ai(f"Extract key decisions and a bulleted action plan from: {raw_text}")
+            st.markdown(f"<div class='ai-box'>{res}</div>", unsafe_allow_html=True)
 
-# 9. TASK MANAGER
-elif page == "✅ Task Manager":
-    st.markdown("## ✅ Smart Tasks")
-    new_task = st.text_input("What needs to be done?")
-    if st.button("Add Task") and new_task:
-        st.session_state.tasks.append(new_task)
+# 8. TASK MASTER
+elif page == "Task Master":
+    st.markdown("## ✅ Task Master")
+    if "pro_tasks" not in st.session_state: st.session_state.pro_tasks = []
     
-    for i, t in enumerate(st.session_state.tasks):
-        col_l, col_r = st.columns([4, 1])
-        col_l.write(f"- {t}")
-        if col_r.button("Done", key=f"t_{i}"):
-            st.session_state.tasks.pop(i)
-            st.rerun()
+    t_input = st.text_input("Define New Objective")
+    if st.button("Inject Task") and t_input:
+        st.session_state.pro_tasks.append(t_input)
+        st.rerun()
+    
+    for i, t in enumerate(st.session_state.pro_tasks):
+        st.markdown(f"<div style='background:rgba(255,255,255,0.03); padding:15px; border-radius:10px; margin-bottom:5px; border:1px solid rgba(255,255,255,0.05);'>⚡ {t}</div>", unsafe_allow_html=True)
+
+st.markdown("---")
+st.caption("WorkFlow Pro v2.0 | High-Performance AI Backend")
