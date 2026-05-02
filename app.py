@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 from datetime import datetime
 
 # 1. LUXURY PAGE CONFIG
-st.set_page_config(page_title="WorkFlow AI Pro", page_icon="💎", layout="wide")
+st.set_page_config(page_title="WorkFlow AI ", page_icon="💎", layout="wide")
 
 # 2. INITIALIZE SESSION STATES
 # This is crucial to prevent the "KeyError" and blank screens
@@ -78,7 +78,18 @@ if current_page == "Dashboard":
     
     df = pd.DataFrame({"Dept": ["Sales", "HR", "Support", "Dev"], "Gains": [10, 15, 20, 25]})
     st.plotly_chart(px.bar(df, x="Dept", y="Gains", template="plotly_dark", color_discrete_sequence=['#6366f1']), use_container_width=True)
-
+# Charts
+    st.markdown("<br>", unsafe_allow_html=True)
+    col_l, col_r = st.columns([3, 2])
+    with col_l:
+        df = pd.DataFrame({"Dept": ["Sales", "HR", "Support", "Dev"], "Hours Saved": [10, 15, 20, 25]})
+        fig = px.bar(df, x="Dept", y="Hours Saved", title="Productivity Gains (Hours)", template="plotly_dark")
+        fig.update_traces(marker_color='#6366f1')
+        st.plotly_chart(fig, use_container_width=True)
+    with col_r:
+        pie_df = pd.DataFrame({"Feature": ["Email", "Task", "Summary"], "Usage": [40, 30, 30]})
+        fig2 = px.pie(pie_df, names="Feature", values="Usage", hole=0.4, title="Feature Usage", template="plotly_dark")
+        st.plotly_chart(fig2, use_container_width=True)
 # Email Writer
 elif current_page == "AI Email Writer":
     st.title("✉️ AI Email Writer")
