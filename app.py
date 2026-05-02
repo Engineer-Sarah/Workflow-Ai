@@ -110,18 +110,18 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     st.markdown("---")
 
-    # 1. Check if we have a key in secrets but haven't initialized the model yet
+    # --- AUTO-CONNECT LOGIC ---
     if not st.session_state.api_key_valid:
-        auto_key = get_api_key()
-        if auto_key:
-            with st.spinner("Auto-connecting..."):
-                m, mn = try_init_model(auto_key)
-                if m:
-                    st.session_state.model = m
-                    st.session_state.api_key_valid = True
-                    st.session_state.last_api_key = auto_key
+        # This looks into your Streamlit Secrets automatically
+        secret_key = get_api_key() 
+        if secret_key:
+            model, model_name = try_init_model(secret_key)
+            if model:
+                st.session_state.model = model
+                st.session_state.api_key_valid = True
+                st.session_state.last_api_key = secret_key
 
-    # 2. Display either the Success Message OR the Input Box
+    # --- DISPLAY STATUS ---
     if st.session_state.api_key_valid:
         st.markdown("""
         <div style='background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3);
@@ -129,29 +129,19 @@ with st.sidebar:
             ✅ AI Connected & Ready
         </div>
         """, unsafe_allow_html=True)
-        
-        # Optional: Add a reset button if you want to change keys
-        if st.button("Change API Key", use_container_width=True):
-            st.session_state.api_key_valid = False
-            st.session_state.model = None
-            st.rerun()
     else:
         st.markdown("<div style='font-size:0.75rem; color:#64748b; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:0.3rem;'>Gemini API Key</div>", unsafe_allow_html=True)
-        api_key_input = st.text_input("", type="password", placeholder="AIza...", label_visibility="collapsed", key="api_key_widget")
-        
+        api_key_input = st.text_input("", type="password", placeholder="AIza...", label_visibility="collapsed", key="sidebar_api_key_input")
         if api_key_input:
-            with st.spinner("Connecting..."):
-                model, model_name = try_init_model(api_key_input)
-                if model:
-                    st.session_state.model = model
-                    st.session_state.api_key_valid = True
-                    st.session_state.last_api_key = api_key_input
-                    st.rerun()
-                else:
-                    st.error("❌ Invalid Key")
+            m, mn = try_init_model(api_key_input)
+            if m:
+                st.session_state.model = m
+                st.session_state.api_key_valid = True
+                st.rerun()
 
     st.markdown("---")
     st.markdown("<div style='font-size:0.75rem; color:#64748b; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:0.5rem;'>Navigation</div>", unsafe_allow_html=True)
+    
     pages = {
         "📊  Dashboard": "Dashboard",
         "✉️  AI Email Writer": "AI Email Writer",
@@ -160,11 +150,13 @@ with st.sidebar:
         "💬  Customer Reply": "Customer Reply Assistant",
         "📈  Weekly Report": "Weekly Report Generator",
     }
-    page = st.radio("", list(pages.keys()), label_visibility="collapsed")
+    
+    # ADDED A UNIQUE KEY HERE TO PREVENT DUPLICATE ELEMENT ID ERROR
+    page = st.radio("", list(pages.keys()), label_visibility="collapsed", key="main_navigation_radio")
     current_page = pages[page]
+    
     st.markdown("---")
     st.markdown("<div style='font-size:0.7rem; color:#475569; text-align:center; line-height:1.6;'>Powered by Google Gemini AI<br><span style='color:#334155;'>HEC GenAI Hackathon · Cohort 3</span></div>", unsafe_allow_html=True)
-
 # Dashboard
 if current_page == "Dashboard":
     hour = datetime.now().hour
