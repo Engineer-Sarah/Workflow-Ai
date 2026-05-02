@@ -361,7 +361,7 @@ elif current_page == "Weekly Report Generator":
                 st.markdown(f"<div class='ai-output'>{r['content']}</div>", unsafe_allow_html=True)
 
 st.markdown("<br><br>", unsafe_allow_html=True)
-st.markdown("<div style='text-align:center; color:#1e293b; font-size:0.72rem;'>WorkFlow AI · Built with Streamlit + Google Gemini · HEC GenAI Hackathon Cohort 3</div>", unsafe_allow_html=True)import streamlit as st
+st.markdown("<div style='text-align:center; color:#1e293b; font-size:0.72rem;'>WorkFlow AI · Built with Streamlit + Google Gemini · HEC GenAI Hackathon Cohort 3</div>", unsafe_allow_html=True)
 import google.generativeai as genai
 import pandas as pd
 import plotly.express as px
